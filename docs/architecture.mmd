@@ -1,0 +1,67 @@
+flowchart TB
+  subgraph INPUT["1. Entradas"]
+    MEDIA["Vídeos clínicos e áudios de consultas"]
+    CLINICAL["Sinais vitais, prescrições e evolução clínica"]
+    REPLAY["Reprodução temporal de dados para demonstração"]
+  end
+
+  subgraph APP["2. Aplicação e ingestão"]
+    UI["Painel médico<br/>Uploads, linha do tempo e revisão de alertas"]
+    API["API Python / FastAPI<br/>Validação, paciente, atendimento e horário"]
+    STORE[("Arquivos<br/>Vídeos, áudios e relatórios")]
+    QUEUE["Fila de tarefas<br/>Mídia e eventos clínicos separados"]
+  end
+
+  subgraph PROCESS["3. Análise por modalidade"]
+    VIDEO["Vídeo<br/>Postura, movimento e eventos anormais"]
+    AUDIO["Análise acústica<br/>Pausas, ritmo e características vocais"]
+    SPEECH["Azure Speech to Text<br/>Transcrição com marcação temporal"]
+    TEXT["Azure Text Analytics<br/>Sentimentos e extração de termos"]
+    CONTEXT["Regras de contexto<br/>Termos críticos e negações"]
+    ANOMALY["Anomalias clínicas<br/>Sinais vitais e mudanças de prescrição"]
+  end
+
+  subgraph DECISION["4. Evidências e decisão"]
+    EVIDENCE["Evidências padronizadas<br/>Paciente, horário, origem, qualidade e resultado"]
+    FUSION["Fusão temporal por paciente<br/>Regras explicáveis e modalidades disponíveis"]
+    ALERT["Gestão de alertas<br/>Prioridade, deduplicação e acompanhamento"]
+    REPORT["Relatórios automáticos<br/>Desvios, evidências e resultados"]
+    DB[("PostgreSQL<br/>Histórico, evidências, alertas e auditoria")]
+  end
+
+  MEDIA --> UI --> API
+  CLINICAL --> API
+  REPLAY --> API
+  API --> STORE
+  API --> QUEUE
+  QUEUE --> VIDEO
+  QUEUE --> AUDIO
+  QUEUE --> SPEECH
+  QUEUE --> ANOMALY
+  QUEUE -->|"Evolução clínica em texto"| TEXT
+  STORE -.->|"Leitura de mídia"| VIDEO
+  STORE -.->|"Leitura de mídia"| AUDIO
+  STORE -.->|"Leitura de mídia"| SPEECH
+  SPEECH --> TEXT --> CONTEXT
+  VIDEO --> EVIDENCE
+  AUDIO --> EVIDENCE
+  CONTEXT --> EVIDENCE
+  ANOMALY --> EVIDENCE
+  EVIDENCE --> DB
+  EVIDENCE --> FUSION
+  DB -.->|"Histórico e estado das janelas"| FUSION
+  FUSION --> ALERT
+  FUSION --> REPORT
+  ALERT --> DB
+  REPORT --> STORE
+  ALERT -->|"Atualização via API / SSE"| UI
+  REPORT -->|"Consulta via API"| UI
+  UI -->|"Reconhecer e encerrar alertas via API"| DB
+
+  classDef azure fill:#e3f2fd,stroke:#0078d4,color:#102a43
+  classDef decision fill:#fff3df,stroke:#c77700,color:#432c0a
+  classDef data fill:#e8f5e9,stroke:#388e3c,color:#18351b
+  class SPEECH,TEXT azure
+  class FUSION,ALERT decision
+  class STORE,DB data
+
