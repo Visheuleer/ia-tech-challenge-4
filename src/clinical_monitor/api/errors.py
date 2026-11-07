@@ -1,14 +1,17 @@
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import OperationalError
 
 from clinical_monitor.application.errors import (
     ApplicationError,
+    InvalidAnalysis,
     InvalidRelationship,
     RecordConflict,
     RecordNotFound,
 )
 
 ERROR_STATUS_CODES = {
+    InvalidAnalysis: status.HTTP_422_UNPROCESSABLE_CONTENT,
     RecordNotFound: status.HTTP_404_NOT_FOUND,
     RecordConflict: status.HTTP_409_CONFLICT,
     InvalidRelationship: status.HTTP_422_UNPROCESSABLE_CONTENT,
@@ -19,3 +22,10 @@ async def handle_application_error(request: Request, exc: ApplicationError) -> J
     status_code = ERROR_STATUS_CODES.get(type(exc), status.HTTP_500_INTERNAL_SERVER_ERROR)
     detail = str(exc) if status_code != 500 else "Internal server error"
     return JSONResponse(status_code=status_code, content={"detail": detail})
+
+
+async def handle_database_unavailable(request: Request, exc: OperationalError) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        content={"detail": "Database unavailable"},
+    )

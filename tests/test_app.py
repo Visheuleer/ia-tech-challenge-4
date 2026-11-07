@@ -1,13 +1,16 @@
+from collections.abc import Callable
+
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pytest import MonkeyPatch
 
-from clinical_monitor.api.app import create_app
 
-
-def test_app_starts_with_environment_configuration(monkeypatch: MonkeyPatch) -> None:
+def test_app_starts_with_environment_configuration(
+    monkeypatch: MonkeyPatch, app_factory: Callable[[], FastAPI]
+) -> None:
     monkeypatch.setenv("CLINICAL_MONITOR_APP_NAME", "Clinical Monitor Test")
 
-    with TestClient(create_app()) as client:
+    with TestClient(app_factory()) as client:
         response = client.get("/health")
         schema = client.get("/openapi.json")
 

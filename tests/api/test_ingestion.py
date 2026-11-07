@@ -1,16 +1,15 @@
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from concurrent.futures import ThreadPoolExecutor
 from uuid import uuid4
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
-
-from clinical_monitor.api.app import create_app
 
 
 @pytest.fixture
-def client() -> Iterator[TestClient]:
-    with TestClient(create_app()) as client:
+def client(app_factory: Callable[[], FastAPI]) -> Iterator[TestClient]:
+    with TestClient(app_factory()) as client:
         yield client
 
 
@@ -175,11 +174,11 @@ def test_concurrent_replays_create_only_one_record(
 
 
 def test_app_instances_do_not_share_records(
-    client: TestClient, records: dict[str, dict[str, object]]
+    client: TestClient, records: dict[str, dict[str, object]], app_factory: Callable[[], FastAPI]
 ) -> None:
     client.post("/v1/patients", json=records["patients"])
 
-    with TestClient(create_app()) as other_client:
+    with TestClient(app_factory()) as other_client:
         response = other_client.get(f"/v1/patients/{records['patients']['patient_id']}")
 
     assert response.status_code == 404

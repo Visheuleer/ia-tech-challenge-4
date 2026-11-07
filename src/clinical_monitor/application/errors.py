@@ -12,3 +12,7 @@ class RecordConflict(ApplicationError):
 
 class InvalidRelationship(ApplicationError):
     pass
+
+
+class InvalidAnalysis(ApplicationError):
+    pass
