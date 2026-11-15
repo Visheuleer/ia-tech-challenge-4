@@ -1,0 +1,64 @@
+{
+  "version": "1.0.0+810fec90b0b8",
+  "features": [
+    "asymmetry_max",
+    "asymmetry_mean",
+    "knee_min",
+    "knee_range",
+    "tilt_max",
+    "tilt_range"
+  ],
+  "mean": [
+    10.2914457321167,
+    4.827886417933873,
+    90.66440725326538,
+    83.89346265792847,
+    24.881410450329945,
+    22.06967904194534
+  ],
+  "scale": [
+    5.070962167889747,
+    1.8811050335350181,
+    14.416648239469986,
+    17.754706211072616,
+    10.01375677245401,
+    7.8936718354936275
+  ],
+  "coefficients": [
+    0.03110377518661549,
+    -0.23999226597094622,
+    -0.8257890023144009,
+    0.9226642145905644,
+    0.6565087169178213,
+    0.44307549039464106
+  ],
+  "intercept": -0.03638378385500268,
+  "threshold": 0.5,
+  "regularization": 0.1,
+  "scope": "REHAB24 exercise 6 single repetition, half-profile, full body; educational pilot",
+  "training_participants": [
+    "3",
+    "4"
+  ],
+  "manifest_sha256": "ee2cf6b642534cfb93f679ff9181651d0970bed215edd41e8baa0b20a505ab07",
+  "training_data_provenance": {
+    "source": "https://zenodo.org/records/13305826",
+    "version": "v1",
+    "license": "Academic/non-profit, non-commercial research only; attribution required",
+    "citation": "Cernek, Sedmidubsky and Budikova. REHAB24-6: Physical Therapy Dataset for Analyzing Pose Estimation Methods. SISAP, 2024.",
+    "scenario": "Exercise 6: squats; Camera17; real recordings with physiotherapist correctness labels; half-profile view and lights on in both classes",
+    "participant_splits": {
+      "3": "development",
+      "4": "development",
+      "5": "validation",
+      "9": "test"
+    },
+    "limitations": [
+      "Staged correct/incorrect exercise executions; not evidence of patient diagnosis",
+      "Binary correctness annotations do not specify the error mechanism",
+      "Never tune thresholds on validation/test participants",
+      "Same viewpoint and lighting in both classes to reduce acquisition confounding"
+    ]
+  },
+  "method": "Logistic regression; development-only standardization; fixed threshold"
+}
