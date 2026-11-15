@@ -11,7 +11,9 @@ router = APIRouter(prefix="/vital-signs", tags=["vital-signs"])
 
 
 def get_vital_signs_service(request: Request, ingestion: IngestionDependency) -> VitalSignsService:
-    return VitalSignsService(ingestion, request.app.state.vital_ranges)
+    return VitalSignsService(
+        ingestion, request.app.state.vital_ranges, request.app.state.vital_temporal_rules
+    )
 
 
 @router.post(

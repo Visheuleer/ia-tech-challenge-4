@@ -70,6 +70,45 @@ def test_records_survive_application_restart(database: tuple[Engine, Config, str
         assert client.post("/v1/patients", json=response.json()).status_code == 200
 
 
+def test_temporal_analysis_retains_samples_after_restart(
+    database: tuple[Engine, Config, str], temporal_payload: dict
+) -> None:
+    _, _, url = database
+    settings = Settings(
+        database_url=url,
+        vital_ranges={"heart_rate": {"lower": 10.0, "upper": 20.0}},
+        vital_temporal_rules={
+            "heart_rate": {"min_duration_seconds": 10.0, "max_gap_seconds": 5.0, "min_samples": 3}
+        },
+    )
+    first = temporal_payload["measurements"][0]
+    with TestClient(create_app(settings)) as client:
+        assert (
+            client.post("/v1/patients", json={"patient_id": first["patient_id"]}).status_code == 201
+        )
+        assert (
+            client.post(
+                "/v1/encounters",
+                json={
+                    "patient_id": first["patient_id"],
+                    "encounter_id": first["encounter_id"],
+                    "started_at": "2020-01-01T00:00:00Z",
+                },
+            ).status_code
+            == 201
+        )
+        original = client.post("/v1/vital-signs/analyze-series", json=temporal_payload)
+        assert original.status_code == 201
+
+    with TestClient(create_app(settings)) as client:
+        replay = client.post("/v1/vital-signs/analyze-series", json=temporal_payload)
+        assert replay.status_code == 200
+        assert replay.json() == original.json()
+        saved = client.get(f"/v1/evidence/{replay.json()['event_id']}").json()
+        assert len(saved["supporting_measurements"]) == 3
+        assert saved == original.json()
+
+
 def test_vital_analysis_survives_restart_without_duplicate_evidence(
     database: tuple[Engine, Config, str],
 ) -> None:
@@ -181,3 +220,28 @@ def test_database_failure_does_not_leak_connection_details(tmp_path: Path) -> No
 
     assert response.status_code == 503
     assert response.json() == {"detail": "Database unavailable"}
+
+
+def test_runtime_compare_and_swap_survives_restart(database):
+    from datetime import UTC, datetime
+
+    from clinical_monitor.domain.patients import Encounter, Patient
+    from clinical_monitor.infrastructure.database.service import create_ingestion_service
+    from clinical_monitor.infrastructure.runtime import SqlRuntimeStore
+
+    engine, _, _ = database
+    service = create_ingestion_service(engine)
+    patient_id, encounter_id = uuid4(), uuid4()
+    service.register_patient(Patient(patient_id=patient_id))
+    service.register_encounter(
+        Encounter(patient_id=patient_id, encounter_id=encounter_id, started_at=datetime.now(UTC))
+    )
+    store = SqlRuntimeStore(engine)
+    key = f"job:{uuid4()}"
+    assert store.create(key, "job", encounter_id, {"status": "queued"})
+    assert not store.create(key, "job", encounter_id, {"status": "duplicate"})
+    assert store.replace(key, 1, {"status": "running"})
+    assert not store.replace(key, 1, {"status": "stale"})
+    restored = SqlRuntimeStore(engine)
+    assert restored.get(key) == (2, {"status": "running"})
+    assert restored.list("job", encounter_id) == [{"status": "running"}]
