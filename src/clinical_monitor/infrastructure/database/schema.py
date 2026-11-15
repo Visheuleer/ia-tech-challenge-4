@@ -4,7 +4,9 @@ from sqlalchemy import (
     ForeignKey,
     ForeignKeyConstraint,
     Index,
+    Integer,
     MetaData,
+    String,
     Table,
     UniqueConstraint,
     Uuid,
@@ -42,4 +44,15 @@ evidence = Table(
         name="fk_evidence_encounter_patient",
     ),
     Index("ix_evidence_encounter_patient", "encounter_id", "patient_id"),
+)
+
+runtime_records = Table(
+    "runtime_records",
+    metadata,
+    Column("record_key", String(120), primary_key=True),
+    Column("kind", String(30), nullable=False),
+    Column("encounter_id", Uuid, ForeignKey("encounters.encounter_id"), nullable=False),
+    Column("version", Integer, nullable=False),
+    Column("payload", JSON, nullable=False),
+    Index("ix_runtime_kind_encounter", "kind", "encounter_id"),
 )

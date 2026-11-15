@@ -38,3 +38,13 @@ class SqlRepository[T: DomainModel]:
                 return False
             raise RecordConflict("Identifier or relationship conflicts with stored data") from exc
         return True
+
+    def list(self, filters: dict | None = None, limit: int = 1000) -> list[T]:
+        statement = select(self._table.c.payload)
+        for name, value in (filters or {}).items():
+            statement = statement.where(self._table.c[name] == value)
+        with self._engine.connect() as connection:
+            rows = connection.execute(
+                statement.order_by(self._table.c[self._id_field]).limit(limit)
+            ).scalars()
+            return [self._model.model_validate(row) for row in rows]

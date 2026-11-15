@@ -23,3 +23,11 @@ class InMemoryRepository[T: DomainModel]:
                 return False
             self._records[record_id] = record
             return True
+
+    def list(self, filters: dict | None = None, limit: int = 1000) -> list[T]:
+        with self._lock:
+            return [
+                record
+                for _, record in sorted(self._records.items())
+                if all(getattr(record, name) == value for name, value in (filters or {}).items())
+            ][:limit]
