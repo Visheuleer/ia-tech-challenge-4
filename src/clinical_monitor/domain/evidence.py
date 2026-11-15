@@ -27,6 +27,14 @@ class DetectionMethod(StrEnum):
     MODEL = "model"
 
 
+class EvidenceMeasurement(DomainModel):
+    source_id: UUID
+    observed_at: UtcDatetime
+    measured_value: Annotated[float, Field(strict=True)]
+    unit: NonEmptyText
+    quality_status: QualityStatus
+
+
 class Evidence(DomainModel):
     event_id: UUID
     patient_id: UUID
@@ -48,6 +56,7 @@ class Evidence(DomainModel):
     unit: NonEmptyText | None = None
     confidence: Annotated[float, Field(ge=0, le=1, strict=True)] | None = None
     rule_criteria: NonEmptyText | None = None
+    supporting_measurements: Annotated[tuple[EvidenceMeasurement, ...], Field(max_length=1000)] = ()
 
     @model_validator(mode="after")
     def validate_timeline(self) -> Self:
@@ -57,6 +66,11 @@ class Evidence(DomainModel):
             raise ValueError("observed_at must be within the analysis window")
         if self.processed_at < self.window_end:
             raise ValueError("processed_at must not precede window_end")
+        if any(
+            not self.window_start <= sample.observed_at <= self.window_end
+            for sample in self.supporting_measurements
+        ):
+            raise ValueError("Supporting measurements must be within the analysis window")
         return self
 
     @model_validator(mode="after")

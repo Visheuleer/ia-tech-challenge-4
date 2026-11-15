@@ -1,4 +1,5 @@
 from collections.abc import Callable, Iterator
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
@@ -41,3 +42,26 @@ def app_factory(request: pytest.FixtureRequest, tmp_path: Path) -> Iterator[Call
     yield factory
     for engine in engines:
         engine.dispose()
+
+
+@pytest.fixture
+def temporal_payload() -> dict:
+    patient_id, encounter_id = str(uuid4()), str(uuid4())
+    return {
+        "series_id": str(uuid4()),
+        "measurements": [
+            {
+                "source_id": str(uuid4()),
+                "patient_id": patient_id,
+                "encounter_id": encounter_id,
+                "signal": "heart_rate",
+                "value": 25.0,
+                "unit": "bpm",
+                "observed_at": (
+                    datetime(2020, 1, 1, 12, tzinfo=UTC) + timedelta(seconds=seconds)
+                ).isoformat(),
+                "quality_status": "valid",
+            }
+            for seconds in [0, 5, 10]
+        ],
+    }
