@@ -1,0 +1,197 @@
+{
+  "evaluated_at": "2026-11-15T18:53:48.592155+00:00",
+  "clinical_validation": false,
+  "manifest_sha256": "ee2cf6b642534cfb93f679ff9181651d0970bed215edd41e8baa0b20a505ab07",
+  "models": {
+    "squat": {
+      "version": "1.0.0+810fec90b0b8",
+      "sha256": "4d1faaeafe796805929de2c4bb671310a95baceddfe0da62229dbf63f50a5a81",
+      "training_participants": [
+        "3",
+        "4"
+      ]
+    },
+    "sustained_vowel": {
+      "version": "1.0.0+ff6d073262e9",
+      "sha256": "ef06a630ce4cd5e876035c101070a213c64ae4334a4e104b9735c78b340d78c5",
+      "training_participants": [
+        "voice001",
+        "voice002",
+        "voice003",
+        "voice004",
+        "voice005",
+        "voice006",
+        "voice007",
+        "voice008",
+        "voice009",
+        "voice010",
+        "voice011",
+        "voice012",
+        "voice013",
+        "voice014",
+        "voice015",
+        "voice016",
+        "voice017",
+        "voice018",
+        "voice019",
+        "voice020",
+        "voice021",
+        "voice022",
+        "voice024",
+        "voice025",
+        "voice032",
+        "voice034",
+        "voice040",
+        "voice045",
+        "voice049",
+        "voice051",
+        "voice060",
+        "voice061",
+        "voice067",
+        "voice070",
+        "voice085",
+        "voice090",
+        "voice091",
+        "voice092",
+        "voice095",
+        "voice096"
+      ]
+    }
+  },
+  "profiles": {
+    "sustained_vowel": {
+      "scope": "VOICED sustained vowel /a/ pilot; pathological vs healthy voice, not diagnosis",
+      "metrics": {
+        "development": {
+          "total": 40,
+          "evaluated": 40,
+          "abstained": 0,
+          "tp": 10,
+          "tn": 16,
+          "fp": 4,
+          "fn": 10,
+          "accuracy": 0.65,
+          "sensitivity": 0.5,
+          "specificity": 0.8
+        },
+        "validation": {
+          "total": 12,
+          "evaluated": 12,
+          "abstained": 0,
+          "tp": 2,
+          "tn": 3,
+          "fp": 3,
+          "fn": 4,
+          "accuracy": 0.4166666666666667,
+          "sensitivity": 0.3333333333333333,
+          "specificity": 0.5
+        },
+        "test": {
+          "total": 12,
+          "evaluated": 12,
+          "abstained": 0,
+          "tp": 3,
+          "tn": 3,
+          "fp": 3,
+          "fn": 3,
+          "accuracy": 0.5,
+          "sensitivity": 0.5,
+          "specificity": 0.5
+        }
+      }
+    },
+    "squat": {
+      "scope": "REHAB24 exercise 6 single repetition, half-profile, full body; educational pilot",
+      "metrics": {
+        "development": {
+          "total": 8,
+          "evaluated": 8,
+          "abstained": 0,
+          "tp": 4,
+          "tn": 4,
+          "fp": 0,
+          "fn": 0,
+          "accuracy": 1.0,
+          "sensitivity": 1.0,
+          "specificity": 1.0
+        },
+        "validation": {
+          "total": 4,
+          "evaluated": 4,
+          "abstained": 0,
+          "tp": 2,
+          "tn": 2,
+          "fp": 0,
+          "fn": 0,
+          "accuracy": 1.0,
+          "sensitivity": 1.0,
+          "specificity": 1.0
+        },
+        "test": {
+          "total": 4,
+          "evaluated": 4,
+          "abstained": 0,
+          "tp": 2,
+          "tn": 2,
+          "fp": 0,
+          "fn": 0,
+          "accuracy": 1.0,
+          "sensitivity": 1.0,
+          "specificity": 1.0
+        }
+      }
+    }
+  },
+  "integration": {
+    "success": true,
+    "completed_jobs": 20,
+    "vitals": {
+      "samples": 120,
+      "p50_seconds": 0.2099192999994557,
+      "p95_seconds": 0.37755814999973153,
+      "temporal_evidence": 118,
+      "alerts": 2,
+      "measurement_scope": "HTTP ingestion through persisted alert; not UI or load-test latency"
+    },
+    "clinical_control": {
+      "evolution": true,
+      "prescription": true,
+      "alerts_reviewed": 1,
+      "report_generated": true
+    },
+    "azure_consultations": [
+      {
+        "file": "primock57\\day1_consultation04_patient-first120s.wav",
+        "status": "completed",
+        "azure_language": true,
+        "approximate_word_error_rate": 0.25748502994011974
+      },
+      {
+        "file": "primock57\\day1_consultation06_patient-first120s.wav",
+        "status": "completed",
+        "azure_language": true,
+        "approximate_word_error_rate": 0.11494252873563218
+      }
+    ]
+  },
+  "browser": {
+    "alert_visible_seconds": 5.019,
+    "draft_preserved": true,
+    "review_form_preserved": true,
+    "acknowledged_and_closed": true
+  },
+  "automated_tests": {
+    "passed": 211,
+    "postgresql_included": true
+  },
+  "limitations": [
+    "Small convenience sample; no clinical performance claim",
+    "Video test contains four repetitions from one held-out participant",
+    "Pose completeness handling was corrected after observing abstentions; no classification thresholds were tuned on held-out labels",
+    "Voice test accuracy is 50%; not suitable for clinical decisions",
+    "Speech WER is approximate because a partial utterance may cross the 120-second crop boundary",
+    "BIDMC replay validates engineering rules, not clinical anomaly accuracy",
+    "Local latency measurements are not a load test",
+    "Full Docker application image and remote CI not executed"
+  ]
+}

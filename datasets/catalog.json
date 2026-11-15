@@ -1,0 +1,62 @@
+{
+  "rehab24": {
+    "source": "https://zenodo.org/records/13305826",
+    "version": "v1",
+    "license": "Academic/non-profit, non-commercial research only; attribution required",
+    "citation": "Cernek, Sedmidubsky and Budikova. REHAB24-6: Physical Therapy Dataset for Analyzing Pose Estimation Methods. SISAP, 2024.",
+    "scenario": "Exercise 6: squats; Camera17; real recordings with physiotherapist correctness labels; half-profile view and lights on in both classes",
+    "participant_splits": {
+      "3": "development",
+      "4": "development",
+      "5": "validation",
+      "9": "test"
+    },
+    "limitations": [
+      "Staged correct/incorrect exercise executions; not evidence of patient diagnosis",
+      "Binary correctness annotations do not specify the error mechanism",
+      "Never tune thresholds on validation/test participants",
+      "Same viewpoint and lighting in both classes to reduce acquisition confounding"
+    ]
+  },
+  "voiced": {
+    "source": "https://physionet.org/content/voiced/1.0.0/",
+    "version": "1.0.0",
+    "license": "Open Data Commons Attribution License v1.0",
+    "citation": "Cesari et al. A new database of healthy and pathological voices. Computers & Electrical Engineering 68, 310-321, 2018. doi:10.1016/j.compeleceng.2018.04.008",
+    "scenario": "Human sustained vowel recordings: healthy and pathological voices with source diagnoses",
+    "limitations": [
+      "Not consultation speech; unsuitable for transcription or critical terms",
+      "Pathological voice label is not a fatigue, dyspnea or dysarthria diagnosis",
+      "Small convenience subset; no clinical performance claim",
+      "WFDB amplitudes converted to PCM16 without per-recording normalization"
+    ]
+  },
+  "primock57": {
+    "source": "https://github.com/babylonhealth/primock57",
+    "revision": "cd2ac707ad03cb4d2531f4ec6b90c659bf4357c5",
+    "license": "CC BY 4.0",
+    "citation": "Papadopoulos Korfiatis, Moramarco, Sarac and Savkov. PriMock57: A Dataset Of Primary Care Mock Consultations. ACL, 2022.",
+    "scenario": "day1_consultation04 and day1_consultation06: human spoken mock consultations with respiratory complaints",
+    "language": "en-GB",
+    "limitations": [
+      "Human recordings of role-play, not actual patient encounters",
+      "Cannot validate a vocal disease classifier using actor symptom descriptions",
+      "Patient-only channel includes listening silences; these must not be labeled pathological pauses",
+      "English samples need language support before end-to-end app evaluation"
+    ]
+  },
+  "cross_dataset_policy": "Keep sources and people separate. Do not fuse these independent people into a real patient case.",
+  "stage": "Data preparation only; detector evaluation pending",
+  "bidmc": {
+    "source": "https://physionet.org/content/bidmc/1.0.0/",
+    "version": "1.0.0",
+    "license": "Open Data Commons Attribution License v1.0",
+    "citation": "Pimentel et al. Towards a Robust Estimation of Respiratory Rate from Pulse Oximeters. IEEE TBME 64(8), 1914-1923, 2016. DOI:10.1109/TBME.2016.2613124",
+    "scenario": "Hospital heart rate and oxygen saturation numerics; record 01; 1 Hz",
+    "limitations": [
+      "No adjudicated anomaly labels",
+      "This subset contains no blood pressure",
+      "Thresholds used in replay are explicit engineering test settings, not clinical guidance"
+    ]
+  }
+}
