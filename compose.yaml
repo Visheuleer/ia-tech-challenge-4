@@ -15,6 +15,100 @@ services:
       timeout: 5s
       retries: 10
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "127.0.0.1:6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    profiles: ["app"]
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment: &app-environment
+      CLINICAL_MONITOR_DATABASE_URL: postgresql+psycopg://clinical_monitor:${POSTGRES_PASSWORD:-clinical_monitor_local}@postgres:5432/clinical_monitor
+      CLINICAL_MONITOR_REDIS_URL: redis://redis:6379/0
+      CLINICAL_MONITOR_DATA_DIR: /app/data
+      CLINICAL_MONITOR_POSE_MODEL_PATH: /app/models/yolov8n-pose.pt
+    volumes: &app-volumes
+      - ./data:/app/data
+      - ./models:/app/models:ro
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    command: ["sh", "-c", "alembic upgrade head && uvicorn clinical_monitor.api.app:create_app --factory --host 0.0.0.0"]
+
+  media-worker:
+    profiles: ["app"]
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment: *app-environment
+    volumes: *app-volumes
+    depends_on:
+      api:
+        condition: service_healthy
+    command: ["celery", "-A", "clinical_monitor.worker:celery_app", "worker", "-Q", "media", "--concurrency=1", "--loglevel=INFO"]
+
+  clinical-worker:
+    profiles: ["app"]
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment: *app-environment
+    volumes: *app-volumes
+    depends_on:
+      api:
+        condition: service_healthy
+    command: ["celery", "-A", "clinical_monitor.worker:celery_app", "worker", "-Q", "clinical", "--concurrency=1", "--loglevel=INFO"]
+
+  scheduler:
+    profiles: ["app"]
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment: *app-environment
+    depends_on:
+      api:
+        condition: service_healthy
+    command: ["celery", "-A", "clinical_monitor.worker:celery_app", "beat", "--loglevel=INFO"]
+
+  dashboard:
+    profiles: ["app"]
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      CLINICAL_MONITOR_API_URL: http://api:8000
+    ports:
+      - "127.0.0.1:8501:8501"
+    depends_on:
+      api:
+        condition: service_healthy
+    command: ["streamlit", "run", "src/clinical_monitor/dashboard/app.py", "--server.address=0.0.0.0"]
+
 volumes:
   postgres_data:
-
+  redis_data:
