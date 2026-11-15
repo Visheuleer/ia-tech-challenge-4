@@ -4,6 +4,8 @@ Monitoramento multimodal para o Tech Challenge Fase 4: vídeo, áudio, texto, si
 
 ![Arquitetura](docs/architecture.png)
 
+[Relatório técnico em PDF](docs/relatorio-tecnico.pdf): fluxo multimodal, métodos, dados, resultados e limitações da avaliação.
+
 ## Executar localmente
 
 Pré-requisitos: Python 3.12, [uv](https://docs.astral.sh/uv/getting-started/installation/), Docker com Compose e acesso à internet para baixar dependências/modelo. Execute na raiz:
