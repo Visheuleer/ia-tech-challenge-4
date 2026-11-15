@@ -1,6 +1,6 @@
 # Arquitetura implementada
 
-O desenho corrigido pelo usuário foi preservado em [PNG](architecture.png) e [Mermaid](architecture.mmd).
+O diagrama de arquitetura está disponível em [PNG](architecture.png) e [Mermaid](architecture.mmd).
 
 ![Arquitetura](architecture.png)
 
